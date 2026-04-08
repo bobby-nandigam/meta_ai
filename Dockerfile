@@ -38,18 +38,15 @@ ENV LOG_LEVEL=INFO
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)" || exit 1
+    CMD curl -f http://localhost:7860/health || exit 1
 
-# Default command runs the baseline inference script
-# Override with: docker run -e HF_TOKEN=$YOUR_TOKEN autonomous-workos python inference.py
-CMD ["python", "inference.py"]
+# Run the FastAPI server on port 7860
+# Uses for HuggingFace Spaces and cloud deployments
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "7860"]
 
-# Alternative: Run the API server
-# CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "7860"]
+# For local inference testing: docker run -e HF_TOKEN=$YOUR_TOKEN autonomous-workos python inference.py
+# For API server: docker run -p 7860:7860 autonomous-workos
 
-# For Hugging Face Spaces integration
-# Spaces automatically routes to port 7860 for Gradio/Streamlit
-# For FastAPI, expose:
 EXPOSE 7860
 
 # Build: docker build -t autonomous-workos:latest .
