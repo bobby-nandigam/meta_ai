@@ -1,0 +1,162 @@
+"""
+OpenEnv metadata file (openenv.yaml)
+Specifies environment specification and task definitions
+"""
+
+openenv_spec_version: "0.1.0"
+
+metadata:
+  name: "Autonomous Work OS"
+  version: "1.0.0"
+  description: "Production-ready multi-agent system for automating real-world workflows"
+  author: "Meta AI"
+  contact: "ai-workos@meta.com"
+  license: "MIT"
+
+environment:
+  id: "autonomous-workos-v1"
+  type: "task_automation"
+  observation_space:
+    type: "object"
+    description: "Current task state and available actions"
+  action_space:
+    type: "object"
+    description: "Agent action with type and parameters"
+  reward_space:
+    type: "numeric"
+    range: [-1.0, 1.0]
+    description: "Immediate reward signal"
+
+tasks:
+  - id: "email_triage"
+    name: "Email Triage and Classification"
+    description: |
+      Agent must automatically classify and organize emails.
+      - Classify into: work_critical, work_routine, personal, spam
+      - Move to appropriate folders
+      - Suggest responses to routine emails
+    difficulty: "easy"
+    actions:
+      - classify_email
+      - fetch_next_email
+      - complete_task
+    success_criteria:
+      - Classification accuracy > 90%
+      - No critical emails marked as spam
+      - Complete within 20 steps
+    grading:
+      accuracy_weight: 0.6
+      efficiency_weight: 0.3
+      safety_weight: 0.1
+    time_limit: 300  # seconds
+    max_steps: 20
+
+  - id: "code_review"
+    name: "Automated Code Review"
+    description: |
+      Agent must review code pull requests and identify issues.
+      - Detect style violations
+      - Flag bugs and security issues
+      - Suggest improvements
+      - Assess code quality
+    difficulty: "medium"
+    actions:
+      - detect_style_issue
+      - flag_bug
+      - flag_security
+      - suggest_improvement
+      - approve_pr
+      - complete_review
+    success_criteria:
+      - F1 score on issue detection > 0.85
+      - No false positives on critical issues
+      - Reasonable efficiency
+    grading:
+      precision_weight: 0.4
+      recall_weight: 0.4
+      efficiency_weight: 0.2
+    time_limit: 600
+    max_steps: 15
+
+  - id: "data_cleaning"
+    name: "Data Quality and Cleaning"
+    description: |
+      Agent must clean and standardize dataset while maintaining integrity.
+      - Identify data quality issues
+      - Remove duplicates
+      - Handle missing values
+      - Detect and handle outliers
+      - Reformat fields
+    difficulty: "hard"
+    actions:
+      - remove_duplicate
+      - fill_missing
+      - remove_outlier
+      - reformat_field
+      - validate_constraints
+      - complete_cleaning
+    success_criteria:
+      - Data quality score > 0.92
+      - No loss of critical information
+      - Proper edge case handling
+    grading:
+      quality_weight: 0.8
+      efficiency_weight: 0.2
+    time_limit: 900
+    max_steps: 25
+
+observation_format:
+  task_id: "string"
+  task_type: "enum"
+  step_number: "integer"
+  current_state: "object"
+  available_actions: "array"
+  context: "string"
+  timestamp: "datetime"
+  metadata: "object"
+
+action_format:
+  action_type: "string"
+  parameters: "object"
+  agent_reasoning: "string"
+  confidence: "float (0.0-1.0)"
+
+reward_format:
+  immediate_reward: "float (-1.0 to 1.0)"
+  reward_components: "object"
+  trajectory_reward: "float (cumulative)"
+  done: "boolean"
+  info: "object"
+
+evaluation:
+  metrics:
+    - name: "Task Completion Rate"
+      description: "Percentage of tasks completed successfully"
+    - name: "Average Task Score"
+      description: "Mean grade across all tasks (0.0-1.0)"
+    - name: "Efficiency"
+      description: "Average steps taken vs optimal"
+    - name: "Safety Score"
+      description: "Compliance with constraints and policies"
+  baseline_performance:
+    human_score: 0.92
+    random_score: 0.15
+    target_score: 0.85
+
+deployment:
+  container:
+    image: "meta-ai/autonomous-workos:latest"
+    registry: "huggingface"
+  dependencies:
+    - hugging_face_hub
+    - openai
+    - pydantic
+    - torch
+  cuda_required: false
+  min_memory_mb: 1024
+  min_gpu_gb: 0
+
+validation:
+  framework: "openenv"
+  command: "openenv validate"
+  expected_output: "Environment specification valid"
