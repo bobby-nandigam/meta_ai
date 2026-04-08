@@ -29,7 +29,7 @@ class Observation(BaseModel):
     current_state: Dict[str, Any]  # Task-specific state
     available_actions: list  # Valid actions in current state
     context: str  # Human-readable description
-    timestamp: datetime = Field(default_factory=datetime.now)
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
     class Config:

@@ -133,12 +133,24 @@ async def create_environment(task_type: str) -> Dict[str, Any]:
     return {
         "env_id": env_id,
         "task_type": task_type,
-        "observation": {
-            "task_id": obs.task_id,
-            "step_number": obs.step_number,
-            "context": obs.context,
-            "available_actions": obs.available_actions
-        }
+        "observation": obs.model_dump()
+    }
+
+
+@app.post("/api/v1/environments/{env_id}/reset", tags=["Evaluation"])
+async def reset_environment(env_id: str) -> Dict[str, Any]:
+    """Reset an environment and return initial observation"""
+    
+    if env_id not in environments_store:
+        raise HTTPException(status_code=404, detail=f"Environment {env_id} not found")
+    
+    env = environments_store[env_id]
+    obs = env.reset()
+    
+    return {
+        "env_id": env_id,
+        "task_type": env.task_type,
+        "observation": obs.model_dump()
     }
 
 
@@ -153,17 +165,9 @@ async def step_environment(env_id: str, action: Action) -> Dict[str, Any]:
     obs, reward, done, info = env.step(action)
     
     return {
-        "observation": {
-            "task_id": obs.task_id,
-            "step_number": obs.step_number,
-            "context": obs.context,
-            "available_actions": obs.available_actions
-        },
-        "reward": {
-            "immediate": reward.immediate_reward,
-            "trajectory": reward.trajectory_reward,
-            "done": done
-        },
+        "observation": obs.model_dump(),
+        "reward": reward.model_dump(),
+        "done": done,
         "info": info
     }
 
